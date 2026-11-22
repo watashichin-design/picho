@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="vi"><head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.minepi.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://socialchain.app https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com; img-src 'self' https: data:; frame-ancestors 'self' https://*.pinet.com https://*.minepi.com;">
+<script src="https://sdk.minepi.com/pi-sdk.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pi Cho - Pioneer Market</title>
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>Pi.init({version:"2.0", sandbox:false});</script>
+
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#12051f;color:#fff;padding-bottom:90px}
 .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#0d0318;border-bottom:1px solid #2a1450}
@@ -65,4 +66,26 @@ async function payForItem(n,a){try{if(!currentAuth){alert('Ban chua dang nhap! D
 async function testPayment(){ alert('Pi Cho hien khong dung Pi Payments truc tiep. Hay lien he nguoi ban de trao doi.'); }
 function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
 render();
+async function loginWithPi(){
+  try{
+    await Pi.init({ version: "2.0" });
+    const auth = await Pi.authenticate(["username"], onIncomplete);
+    const accessToken = auth.accessToken;
+    // STEP 2 - Exchange with App Studio, trust ONLY its response
+    const res = await fetch("https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com/pi/auth/v1/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken })
+    });
+    if(!res.ok) throw new Error("App Studio login failed: " + res.status);
+    const data = await res.json();
+    window.__piSessionToken = data.sessionToken;
+    const user = data.user;
+    document.getElementById('user').innerText = 'Xin chao, ' + user.username + ' - Da dang nhap Pi Auth (App Studio)';
+    const st = document.getElementById('piStatus');
+    if(st) st.innerText = 'Da dang nhap: ' + user.username + ' | uid: ' + user.uid;
+    alert('Dang nhap Pi Auth thanh cong: ' + user.username);
+  }catch(e){ alert('Hay mo trong Pi Browser de dung Pi Auth. Loi: ' + e.message); }
+}
+function onIncomplete(p){ console.log(p); }
 </script></body></html>
