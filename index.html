@@ -66,6 +66,7 @@ function updateLoginUI(user){
   const st=document.getElementById('piStatus'); if(st) st.innerText='Da dang nhap: '+user.username+' | uid: '+(user.uid||'');
   const btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='● '+user.username;
 }
+async function onIncompletePayment(p){ try{ if(p && p.identifier) console.log('incomplete', p.identifier); }catch(e){} }
 const BACKEND = "https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com";
 async function callBackend(path, body){
   const res = await fetch(BACKEND + path, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (window.__piSessionToken || "") }, body: JSON.stringify(body) });
