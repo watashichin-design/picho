@@ -69,7 +69,7 @@ function updateLoginUI(user){
 async function loginWithPi(){
   try{
     await Pi.init({ version: "2.0" });
-    const auth = await Pi.authenticate(["username"], onIncomplete);
+    const auth = await Pi.authenticate(["username", "payments"], onIncomplete);
     // Giu lai auth de payForItem() khong bi hieu la chua login
     currentAuth = auth;
     const res = await fetch("https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com/pi/auth/v1/login", {
@@ -97,7 +97,7 @@ async function payForItem(n,a){
     await Pi.createPayment({amount:a,memo:'Pi Cho - '+n,metadata:{item:n}},{onReadyForServerApproval:(id)=>console.log(id),onReadyForServerCompletion:(id,tx)=>console.log(id,tx),onCancel:()=>alert('Da huy'),onError:(e)=>alert(e.message)});
     alert('Da tao thanh toan '+a+' Pi cho '+n);
   }catch(e){
-    if((e.message||'').includes('payments')){alert('Chua co quyen payments. Hay bam Connect o tren de dang nhap lai bang Pi Auth trong Pi Browser!');}
+    if((e.message||'').toLowerCase().includes('payment')){ currentAuth=null; localStorage.removeItem('picho_user'); alert('Ban chua cap quyen payments. Bam OK roi bam Connect de dang nhap lai va chap nhan quyen Payments.'); }
     else{alert('Mo trong Pi Browser de thanh toan Pi. Loi: '+e.message);}
   }
 }
