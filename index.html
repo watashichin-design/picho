@@ -1,88 +1,68 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pi Cho - Trao doi hang bang Pi</title>
-<meta name="description" content="Pi Cho - Cho trao doi hang hoa bang Pi cho Pioneer Viet Nam. Tuan thu Pi App Guidelines, ho tro Pi Auth va Pi Payments.">
-<meta name="keywords" content="Pi Network, Pi Cho, Pi Auth, Pi Payments, trao doi Pi">
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi Cho - Pioneer Market</title>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>Pi.init({ version: "2.0", sandbox: false });</script>
+<script>Pi.init({version:"2.0", sandbox:false});</script>
 <style>
-body{font-family:Arial,sans-serif;margin:0;background:#f5f0ff;color:#222}
-header{background:#6a1fa2;color:#fff;padding:16px;text-align:center}
-.btn{background:#ffd700;color:#3b0a5e;border:0;padding:12px 20px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:8px 0}
-.btn2{background:#fff;color:#6a1fa2;border:2px solid #6a1fa2;padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:8px 0}
-.card{background:#fff;margin:12px;padding:14px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.card img{width:100%;border-radius:10px}
-.price{color:#6a1fa2;font-weight:800}
-input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:10px;box-sizing:border-box}
-.tabs{display:flex;gap:8px;padding:12px}
-.tabs button{flex:1;padding:10px;border-radius:20px;border:1px solid #6a1fa2;background:#fff;color:#6a1fa2;font-weight:700}
-.tabs button.active{background:#6a1fa2;color:#fff}
-footer{padding:16px;text-align:center;font-size:13px;color:#666}
-a{color:#6a1fa2}
-</style>
-</head>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#12051f;color:#fff;padding-bottom:90px}
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#0d0318;border-bottom:1px solid #2a1450}
+.logo{display:flex;align-items:center;gap:10px}.logo-icon{width:44px;height:44px;background:#6a1fa2;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#ffd700;font-weight:900}
+.logo b{font-size:20px}.logo span{display:block;font-size:11px;letter-spacing:2px;color:#c9a8ff}
+.connect{background:#1a0b2e;border:1px solid #3a1e6a;color:#fff;padding:8px 14px;border-radius:20px;font-weight:700;cursor:pointer}
+.hero{padding:18px 14px 6px}.hero small{color:#c9a8ff;letter-spacing:1px;font-weight:700}.hero h1{font-size:34px;line-height:1.1;margin:8px 0}
+.banner{margin:12px;background:linear-gradient(135deg,#7b2ff7,#a855f7,#3b82f6);border-radius:20px;padding:18px}
+.banner .pill{display:inline-block;border:1px solid rgba(255,255,255,.6);padding:6px 12px;border-radius:20px;font-size:12px;letter-spacing:1px;font-weight:700}
+.banner h2{font-size:26px;margin:14px 0 8px}.banner p{font-size:14px;line-height:1.5;opacity:.95}
+.btn-row{display:flex;gap:10px;margin-top:14px}.btn-white{background:#fff;color:#6a1fa2;border:0;padding:10px 16px;border-radius:12px;font-weight:800;cursor:pointer}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer}
+.section{padding:10px 14px}.section h3{font-size:18px;margin:10px 0}
+.search{width:100%;padding:12px;border-radius:12px;border:1px solid #3a1e6a;background:#1e0f36;color:#fff;outline:none}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 0}.chips button{white-space:nowrap;background:#1e0f36;border:1px solid #3a1e6a;color:#fff;padding:8px 14px;border-radius:20px;cursor:pointer}.chips button.active{background:#ffd700;color:#3b0a5e;border-color:#ffd700;font-weight:800}
+.card{background:#1e0f36;border:1px solid #2a1450;border-radius:16px;margin:12px 0;overflow:hidden}.card img{width:100%;height:180px;object-fit:cover}.card-body{padding:14px}.price{color:#ffd700;font-size:20px;font-weight:900}.card-body p{color:#d8c8ff;font-size:13px;line-height:1.5}
+.buy{width:100%;background:#ffd700;color:#3b0a5e;border:0;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;margin-top:8px}
+.form input,.form textarea{width:100%;padding:12px;margin:6px 0;border-radius:12px;border:1px solid #3a1e6a;background:#0d0318;color:#fff}
+.bottom{position:fixed;left:12px;right:12px;bottom:12px;background:#1e0f36;border:1px solid #3a1e6a;border-radius:20px;display:flex;justify-content:space-around;padding:10px 6px;z-index:20}.bottom button{background:none;border:0;color:#a78bfa;cursor:pointer;font-size:12px}.bottom button.active{color:#fff}.bottom span{font-size:22px;display:block}
+.hidden{display:none}
+.footer{padding:10px 14px;text-align:center;color:#a78bfa;font-size:12px}
+</style></head>
 <body>
-<header>
-<h1>&pi; Pi Cho - Trao Doi Bang Pi</h1>
-<p>Cho trao doi hang hoa bang Pi cho Pioneer Viet Nam - Tuan thu Pi App Guidelines</p>
-<div id="user">Chua dang nhap - Hay dang nhap bang Pi Auth</div>
-<button class="btn" onclick="loginWithPi()">Dang nhap bang Pi - Pi Auth</button>
-<button class="btn2" onclick="testPayment()">Thanh toan thu bang Pi - Pi Payments (0.1 Pi)</button>
-<p id="authStatus" style="font-size:13px">Pi Auth: chua dang nhap | Pi Payments: san sang | Pi SDK: 2.0</p>
-</header>
-<div class="tabs">
-<button class="active" onclick="showTab('home',this)">Trang chu</button>
-<button onclick="showTab('post',this)">Dang Tin</button>
-<button onclick="showTab('terms',this)">Dieu khoan</button>
-<button onclick="showTab('privacy',this)">Bao mat</button>
+<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET</span></div></div><div><button class="connect" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
+<div id="tab-home">
+<div class="hero"><small>THE PI ECOSYSTEM'S PIONEER MARKET</small><h1>Pioneer<br>Market<br>Brief</h1><p id="user" style="color:#ffd700">Chua dang nhap - Bam Connect de dang nhap bang Pi Auth</p></div>
+<div class="banner"><span class="pill">✦ COMMUNITY MARKET</span><h2>Cho Trao Doi Bang Pi</h2><p>Dang tin cua ban, trao doi hang hoa bang Pi cho Pioneer Viet Nam. Khong tien mat, chi trao doi bang Pi.</p><div class="btn-row"><button class="btn-white" onclick="showTab('post')">✎ Dang Tin</button><button class="btn-ghost" onclick="document.getElementById('list').scrollIntoView()">Xem Cho →</button></div></div>
+<div class="section"><h3>⚡ Latest Pi Cho Updates</h3><input class="search" id="search" placeholder="Tim com chay, ao thun, dien thoai..." oninput="render()"><div class="chips"><button class="active" onclick="setCat('all',this)">View all</button><button onclick="setCat('food',this)">Do an</button><button onclick="setCat('fashion',this)">Thoi trang</button><button onclick="setCat('tech',this)">Cong nghe</button></div></div>
+<div class="section" id="list"></div>
+<div class="footer">Pi Cho - Tuan thu Pi App Guidelines | Pi Auth + Pi Payments | Chi trao doi bang Pi</div>
 </div>
-<div id="home">
-<div style="padding:0 12px"><input id="search" placeholder="Tim do an, quan ao, dien thoai..." oninput="render()"></div>
-<div id="list"></div>
-<div class="card"><h3>Ve Pi Cho</h3><p>Pi Cho la ung dung trao doi hang hoa bang Pi. Nguoi dung dang nhap bang Pi Auth, dang tin trao doi, thanh toan bang Pi Payments. Pi Cho khong mua ban Pi lay tien mat, khong mua ban Pi lay tien phap dinh. Chi trao doi hang hoa bang Pi.</p><p><a href="#terms" onclick="showTab('terms',document.querySelectorAll('.tabs button')[2])">Xem Dieu khoan</a> | <a href="#privacy" onclick="showTab('privacy',document.querySelectorAll('.tabs button')[3])">Xem Chinh sach Bao mat</a></p></div>
+<div id="tab-post" class="hidden section"><div class="card"><div class="card-body form"><h2>Dang Tin Moi</h2><input id="pName" placeholder="Ten mon do"><input id="pPrice" type="number" placeholder="Gia Pi - vd: 5"><input id="pLoc" placeholder="Dia chi"><input id="pContact" placeholder="Lien he Zalo / SDT"><textarea id="pDesc" placeholder="Mo ta"></textarea><button class="buy" onclick="addPost()">Dang Tin Ngay</button><p id="postMsg"></p></div></div></div>
+<div id="tab-pi" class="hidden section"><div class="card"><div class="card-body"><h2>Vi Pi Cua Ban</h2><p id="piStatus">Chua dang nhap Pi Auth. Bam Connect o tren de dang nhap.</p><button class="buy" onclick="loginWithPi()">Dang nhap bang Pi Auth</button><button class="buy" style="background:#fff" onclick="testPayment()">Thanh toan thu 0.1 Pi - Pi Payments</button></div></div></div>
+<div id="tab-news" class="hidden section"><h3>📰 Tin Pi Cho</h3><div class="card"><div class="card-body"><small style="color:#ff6b8a">2 DAYS AGO</small><h3>Pi Cho mo cho trao doi bang Pi cho Pioneer Viet</h3><p>Chi trao doi hang bang Pi, khong tien mat. Dang tin mien phi, ket noi truc tiep Pioneer voi Pioneer.</p></div></div></div>
+<div id="tab-more" class="hidden section"><div class="card"><div class="card-body"><h3>Dieu khoan & Bao mat</h3><p>1. Chi trao doi hang hoa bang Pi. Khong mua ban Pi lay tien mat.</p><p>2. Dang nhap bang Pi Auth, thanh toan bang Pi Payments.</p><p>3. Pi Cho tuan thu Pi App Guidelines.</p><p>Lien he: support@picho.vn</p></div></div></div>
+<div class="bottom">
+<button class="active" onclick="switchBottom('home',this)"><span>🏠</span>Home</button>
+<button onclick="switchBottom('pi',this)"><span>π</span>Pi</button>
+<button onclick="switchBottom('post',this)"><span>🛒</span>Cho</button>
+<button onclick="switchBottom('news',this)"><span>📰</span>News</button>
+<button onclick="switchBottom('more',this)"><span>•••</span>More</button>
 </div>
-<div id="post" style="display:none;padding:12px"><div class="card"><h3>Dang tin moi - Chi trao doi bang Pi</h3><input id="pName" placeholder="Ten mon do"><input id="pPrice" type="number" placeholder="Gia Pi - vi du: 5"><input id="pLoc" placeholder="Dia chi / Tinh thanh"><input id="pContact" placeholder="Lien he"><textarea id="pDesc" placeholder="Mo ta"></textarea><button class="btn" onclick="addPost()">Dang Tin</button><p id="postMsg"></p></div></div>
-<div id="terms" style="display:none;padding:12px"><div class="card"><h3>Dieu khoan Su dung - Terms of Service</h3><p>1. Pi Cho chi cho phep trao doi hang hoa bang Pi.</p><p>2. Nghiem cam mua ban Pi lay tien mat hoac tien phap dinh.</p><p>3. Nguoi dung phai dang nhap bang Pi Auth de xac thuc Pioneer.</p><p>4. Thanh toan thuc hien qua Pi Payments, tuan thu Pi App Guidelines.</p><p>5. Pi Cho khong luu tru mat khau, khong thu thap thong tin nhay cam.</p><p>Lien he: support@picho.vn - Dia chi: Di An, Binh Duong, Viet Nam</p></div></div>
-<div id="privacy" style="display:none;padding:12px"><div class="card"><h3>Chinh sach Bao mat - Privacy Policy</h3><p>Pi Cho ton trong quyen rieng tu cua ban. Chung toi chi thu thap username Pi qua Pi Auth de hien thi va lien he trao doi.</p><p>Chung toi khong ban, khong chia se du lieu ca nhan cho ben thu ba. Du lieu dang tin duoc luu tren trinh duyet cua ban.</p><p>Ban co the xoa tin dang bat cu luc nao. Lien he xoa du lieu: support@picho.vn</p><p>Cap nhat: 22/11/2026</p></div></div>
-<footer><p>Pi Cho - Tuan thu Pi App Guidelines | Ho tro Pi Auth va Pi Payments | Chi trao doi hang bang Pi - Khong tien mat</p><p><a href="#" onclick="showTab('terms',document.querySelectorAll('.tabs button')[2]);return false;">Terms</a> | <a href="#" onclick="showTab('privacy',document.querySelectorAll('.tabs button')[3]);return false;">Privacy Policy</a> | support@picho.vn</p></footer>
 <script>
-const defaultPosts=[
- {name:"Com chay - 1 hop",price:2,loc:"Di An, Binh Duong",contact:"Zalo: 090xxxx",desc:"Com chay gion, giao trong ngay",img:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800"},
- {name:"Ao thun Pi Network",price:8,loc:"TP HCM",contact:"Zalo: 090xxxx",desc:"Ao thun logo Pi, size M L XL",img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800"},
- {name:"Op lung dien thoai",price:3,loc:"Ha Noi",contact:"Zalo: 090xxxx",desc:"Op lung moi, nhieu mau",img:"https://images.unsplash.com/photo-1601593346740-925612772716?w=800"},
+let cat='all';
+const posts=[
+{name:"Com chay - 1 hop",price:2,loc:"Di An, Binh Duong",contact:"Zalo: 090xxxx",desc:"Com chay gion, giao trong ngay",img:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",cat:"food"},
+{name:"Ao thun Pi Network",price:8,loc:"TP HCM",contact:"Zalo: 090xxxx",desc:"Ao thun logo Pi, size M L XL",img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",cat:"fashion"},
+{name:"Op lung dien thoai",price:3,loc:"Ha Noi",contact:"Zalo: 090xxxx",desc:"Op lung moi, nhieu mau",img:"https://images.unsplash.com/photo-1601593346740-925612772716?w=800",cat:"tech"},
 ];
-let posts=JSON.parse(localStorage.getItem('picho_posts')||'null')||defaultPosts;
+let allPosts=JSON.parse(localStorage.getItem('picho_v3')||'null')||posts;
 function render(){
  const q=(document.getElementById('search').value||'').toLowerCase();
- document.getElementById('list').innerHTML=posts.filter(p=>(p.name+p.loc).toLowerCase().includes(q)).map(p=>`<div class="card"><img src="${p.img}"><h3>${p.name}</h3><div class="price">${p.price} Pi</div><p>${p.desc}</p><p>📍 ${p.loc} | ☎️ ${p.contact}</p><button class="btn" onclick="payForItem('${p.name}',${p.price})">Trao Doi - Thanh toan ${p.price} Pi bang Pi Payments</button></div>`).join('');
+ document.getElementById('list').innerHTML=allPosts.filter(p=>(cat==='all'||p.cat===cat)&&(p.name+p.loc).toLowerCase().includes(q)).map(p=>`<div class="card"><img src="${p.img}"><div class="card-body"><small style="color:#ff6b8a">● ${p.loc}</small><h3>${p.name}</h3><div class="price">${p.price} Pi</div><p>${p.desc}<br>☎️ ${p.contact}</p><button class="buy" onclick="payForItem('${p.name}',${p.price})">Trao Doi - ${p.price} Pi</button></div></div>`).join('');
 }
-function showTab(id,btn){document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');['home','post','terms','privacy'].forEach(t=>document.getElementById(t).style.display=(t===id?'block':'none'));}
-async function loginWithPi(){
- try{
-  const auth=await Pi.authenticate(['username','payments','wallet_address'], onIncompletePaymentFound);
-  document.getElementById('user').innerText='Xin chao, '+auth.user.username+' - Da dang nhap Pi Auth';
-  document.getElementById('authStatus').innerText='Pi Auth: da dang nhap - '+auth.user.username+' | Pi Payments: san sang | Pi SDK: 2.0';
-  alert('Dang nhap Pi Auth thanh cong: '+auth.user.username);
- }catch(e){ alert('Hay mo app trong Pi Browser de dung Pi Auth. Loi: '+e.message); }
-}
-function onIncompletePaymentFound(payment){ console.log('Incomplete payment found', payment); if(payment){ Pi.completePayment(payment.identifier); } }
-async function testPayment(){ await payForItem('Thanh toan thu Pi Cho', 0.1); }
-async function payForItem(name, amount){
- try{
-  const payment=await Pi.createPayment({amount: amount, memo: 'Pi Cho - Trao doi: '+name, metadata: {item: name}}, {onReadyForServerApproval: function(paymentId){ console.log('Ready for approval', paymentId); }, onReadyForServerCompletion: function(paymentId, txid){ console.log('Ready for completion', paymentId, txid); }, onCancel: function(paymentId){ alert('Da huy thanh toan'); }, onError: function(error, payment){ alert('Loi thanh toan: '+error.message); }});
-  alert('Da tao thanh toan Pi Payments cho: '+name);
- }catch(e){ alert('Thanh toan Pi Payments can mo trong Pi Browser. Loi: '+e.message); }
-}
-function addPost(){
- const name=document.getElementById('pName').value.trim(); const price=Number(document.getElementById('pPrice').value);
- if(!name||!price){ document.getElementById('postMsg').innerText='Nhap ten va gia Pi!'; return; }
- posts.unshift({name,price,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800'});
- localStorage.setItem('picho_posts', JSON.stringify(posts)); document.getElementById('postMsg').innerText='Da dang tin!'; render(); showTab('home', document.querySelector('.tabs button'));
-}
+function setCat(c,btn){cat=c;document.querySelectorAll('.chips button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
+function switchBottom(id,btn){document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');['home','post','pi','news','more'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==id));if(id==='home')window.scrollTo(0,0);}
+function showTab(id){switchBottom(id,document.querySelectorAll('.bottom button')[id==='post'?2:0]);}
+async function loginWithPi(){try{const auth=await Pi.authenticate(['username','payments','wallet_address'],onIncomplete);document.getElementById('user').innerText='Xin chao, '+auth.user.username+' - Da dang nhap Pi Auth';document.getElementById('piStatus').innerText='Da dang nhap: '+auth.user.username+' | Pi Payments san sang';alert('Dang nhap Pi Auth thanh cong: '+auth.user.username);}catch(e){alert('Hay mo trong Pi Browser de dung Pi Auth. Loi: '+e.message);}}
+function onIncomplete(p){console.log(p);}
+async function payForItem(n,a){try{await Pi.createPayment({amount:a,memo:'Pi Cho - '+n,metadata:{item:n}},{onReadyForServerApproval:(id)=>console.log(id),onReadyForServerCompletion:(id,tx)=>console.log(id,tx),onCancel:()=>alert('Da huy'),onError:(e)=>alert(e.message)});alert('Da tao thanh toan '+a+' Pi cho '+n);}catch(e){alert('Mo trong Pi Browser de thanh toan Pi. Loi: '+e.message);}}
+async function testPayment(){await payForItem('Thanh toan thu',0.1);}
+function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
 render();
-</script>
-</body>
-</html>
+</script></body></html>
