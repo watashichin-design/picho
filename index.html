@@ -25,13 +25,13 @@
 .footer{padding:10px 14px;text-align:center;color:#a78bfa;font-size:12px}
 </style></head>
 <body>
-<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
+<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
 <div id="tab-home">
 <div class="hero"><small>THE PI ECOSYSTEM'S PIONEER MARKET</small><h1>Pioneer<br>Market<br>Brief</h1><p id="user" style="color:#ffd700">Chua dang nhap - Bam Connect de dang nhap bang Pi Auth</p></div>
 <div class="banner"><span class="pill">✦ COMMUNITY MARKET</span><h2>Cho Trao Doi Bang Pi</h2><p>Dang tin cua ban, trao doi hang hoa bang Pi cho Pioneer Viet Nam. Khong tien mat, chi trao doi bang Pi.</p><div class="btn-row"><button class="btn-white" onclick="showTab('post')">✎ Dang Tin</button><button class="btn-ghost" onclick="document.getElementById('list').scrollIntoView()">Xem Cho →</button></div></div>
 <div class="section"><h3>⚡ Latest Pi Cho Updates</h3><input class="search" id="search" placeholder="Tim com chay, ao thun, dien thoai..." oninput="render()"><div class="chips"><button class="active" onclick="setCat('all',this)">View all</button><button onclick="setCat('food',this)">Do an</button><button onclick="setCat('fashion',this)">Thoi trang</button><button onclick="setCat('tech',this)">Cong nghe</button></div></div>
 <div class="section" id="list"></div>
-<div class="footer">Pi Cho - TESTNET ONLY | Dung Pi Test de test thanh toan, khong dung Pi that</div>
+<div class="footer">Pi Cho - TESTNET ONLY | Dung Pi Test, khong dung Pi that</div>
 </div>
 <div id="tab-post" class="hidden section"><div class="card"><div class="card-body form"><h2>Dang Tin Moi</h2><input id="pName" placeholder="Ten mon do"><input id="pPrice" type="number" placeholder="Gia Pi - vd: 5"><input id="pLoc" placeholder="Dia chi"><input id="pContact" placeholder="Lien he Zalo / SDT"><textarea id="pDesc" placeholder="Mo ta"></textarea><button class="buy" onclick="addPost()">Dang Tin Ngay</button><p id="postMsg"></p></div></div></div>
 <div id="tab-pi" class="hidden section"><div class="card"><div class="card-body"><h2>Vi Pi Cua Ban</h2><p id="piStatus">Chua dang nhap Pi Auth. Bam Connect o tren de dang nhap.</p><button class="buy" onclick="loginWithPi()">Dang nhap bang Pi Auth</button><p style="color:#d8c8ff;font-size:13px">Pi Cho hien la cho dang tin - Pioneer tu lien he trao doi bang Pi, khong thanh toan truc tiep trong app.</p></div></div></div>
@@ -68,7 +68,7 @@ function updateLoginUI(user){
 }
 async function loginWithPi(){
   try{
-    await Pi.init({ version: "2.0", sandbox: true }); // TESTNET ONLY - dung Pi Test, khong phai Pi that
+    await Pi.init({ version: "2.0", sandbox: true }); // TESTNET ONLY
     const auth = await Pi.authenticate(["username", "payments"], onIncomplete);
     // Giu lai auth de payForItem() khong bi hieu la chua login
     currentAuth = auth;
@@ -90,7 +90,7 @@ async function loginWithPi(){
 const BACKEND = "https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com";
 async function callBackend(path, body){
   const res = await fetch(BACKEND + path, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (window.__piSessionToken || "") }, body: JSON.stringify(body) });
-  if(!res.ok) throw new Error("Backend " + path + " tra ve " + res.status + " - Backend hoac Vi App chua duoc cau hinh. Hay kiem tra Pi Developer Portal > App Wallet va endpoint " + path);
+  if(!res.ok) throw new Error("Backend " + path + " tra ve " + res.status);
   return res.json();
 }
 async function payForItem(n,a){
@@ -102,21 +102,14 @@ async function payForItem(n,a){
     await Pi.createPayment(
       { amount: a, memo: 'Pi Cho - ' + n, metadata: { item: n } },
       {
-        onReadyForServerApproval: async (paymentId) => {
-          // Buoc bat buoc: backend phai goi Pi API /v2/payments/{id}/approve
-          await callBackend("/pi/payments/approve", { paymentId });
-        },
-        onReadyForServerCompletion: async (paymentId, txid) => {
-          // Buoc bat buoc: backend phai goi Pi API /v2/payments/{id}/complete
-          await callBackend("/pi/payments/complete", { paymentId, txid });
-          alert('Thanh toan thanh cong ' + a + ' Pi cho ' + n + '!');
-        },
+        onReadyForServerApproval: async (paymentId) => { await callBackend("/pi/payments/approve", { paymentId }); },
+        onReadyForServerCompletion: async (paymentId, txid) => { await callBackend("/pi/payments/complete", { paymentId, txid }); alert('Thanh toan thanh cong ' + a + ' Pi cho ' + n + '!'); },
         onCancel: () => alert('Da huy thanh toan'),
         onError: (e) => alert('Loi thanh toan: ' + (e && e.message ? e.message : e))
       }
     );
   }catch(e){
-    alert('Chua thanh toan duoc. Ly do: ' + e.message + ' | Neu thay "App Wallet Misconfigured" nghia la phai vao Pi Developer Portal > App Wallet, dan dia chi Vi TESTNET (bat dau bang G...) cua ban vao roi Save, khong sua bang code duoc.');
+    alert('Chua thanh toan duoc. Ly do: ' + e.message + ' | Neu thay App Wallet Misconfigured thi phai vao Develop > App Wallet chon vi Testnet roi bam Update.');
   }
 }
 function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
