@@ -35,11 +35,13 @@ const server = http.createServer(async (req,res)=>{
     // POST /api/auth/login {accessToken} -> server verifies via Platform API /v2/me
     if(url.pathname==='/api/auth/login'){
       if(!b.accessToken) return send(res,400,{error:'accessToken required'});
-      const me = await piApi('/v2/me'); // NOTE: /v2/me validates the app key; accessToken is verified by Pi SDK auth flow.
-      // In production, verify accessToken by calling Pi Platform with it; here we bind session to the
-      // authenticated Pi user returned by the SDK + require the session token on every later call.
+      // Verify the USER accessToken: GET /v2/me with Authorization: Bearer <user accessToken>.
+      // The app API key must NOT be used here - Pi rejects it for /v2/me and login silently failed.
+      const meRes = await fetch(PI_API + '/v2/me', { headers: { 'Authorization': 'Bearer ' + b.accessToken } });
+      const meText = await meRes.text(); let me = null; try { me = meText ? JSON.parse(meText) : null; } catch {}
+      if (!meRes.ok) return send(res, 401, { error: 'Pi /v2/me rejected accessToken: ' + meRes.status + ' ' + String(meText).slice(0,200) });
       const sessionToken = crypto.randomUUID();
-      const user = { username: b.username || (me && me.username) || 'pioneer', uid: b.uid || (me && me.uid) || null };
+      const user = { username: (me && me.username) || b.username || 'pioneer', uid: (me && me.uid) || b.uid || null };
       sessions.set(sessionToken, { piUid: user.uid, piUsername: user.username });
       return send(res,200,{ sessionToken, user });
     }

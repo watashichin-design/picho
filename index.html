@@ -104,8 +104,8 @@ async function loginWithPi(){
     // Legacy App Studio backend used /pi/auth/v1/login; new server.js uses /api/auth/login.
     let data = null;
     try { data = await callApi("/api/auth/login", { accessToken: auth.accessToken }); }
-    catch (e) { data = await callApi("/pi/auth/v1/login", { accessToken: auth.accessToken }); }
-    if (!data) return null;
+    catch (e) { alert('Login backend loi: ' + e.message); return null; }
+    if (!data) { alert('Login backend khong tra ve session. Xem log Render service picho.'); return null; }
     window.__piSessionToken = data.sessionToken;
     const user = data.user || { username: auth.user.username, uid: auth.user.uid };
     localStorage.setItem('picho_user', JSON.stringify(user));
