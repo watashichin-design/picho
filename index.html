@@ -25,13 +25,13 @@
 .footer{padding:10px 14px;text-align:center;color:#a78bfa;font-size:12px}
 </style></head>
 <body>
-<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
+<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
 <div id="tab-home">
 <div class="hero"><small>THE PI ECOSYSTEM'S PIONEER MARKET</small><h1>Pioneer<br>Market<br>Brief</h1><p id="user" style="color:#ffd700">Chua dang nhap - Bam Connect de dang nhap bang Pi Auth</p></div>
 <div class="banner"><span class="pill">✦ COMMUNITY MARKET</span><h2>Cho Trao Doi Bang Pi</h2><p>Dang tin cua ban, trao doi hang hoa bang Pi cho Pioneer Viet Nam. Khong tien mat, chi trao doi bang Pi.</p><div class="btn-row"><button class="btn-white" onclick="showTab('post')">✎ Dang Tin</button><button class="btn-ghost" onclick="document.getElementById('list').scrollIntoView()">Xem Cho →</button></div></div>
 <div class="section"><h3>⚡ Latest Pi Cho Updates</h3><input class="search" id="search" placeholder="Tim com chay, ao thun, dien thoai..." oninput="render()"><div class="chips"><button class="active" onclick="setCat('all',this)">View all</button><button onclick="setCat('food',this)">Do an</button><button onclick="setCat('fashion',this)">Thoi trang</button><button onclick="setCat('tech',this)">Cong nghe</button></div></div>
 <div class="section" id="list"></div>
-<div class="footer">Pi Cho - TESTNET ONLY | Dung Pi Test, khong dung Pi that</div>
+<div class="footer">Pi Cho - Tuan thu Pi App Guidelines | Pi Auth | Chi trao doi bang Pi</div>
 </div>
 <div id="tab-post" class="hidden section"><div class="card"><div class="card-body form"><h2>Dang Tin Moi</h2><input id="pName" placeholder="Ten mon do"><input id="pPrice" type="number" placeholder="Gia Pi - vd: 5"><input id="pLoc" placeholder="Dia chi"><input id="pContact" placeholder="Lien he Zalo / SDT"><textarea id="pDesc" placeholder="Mo ta"></textarea><button class="buy" onclick="addPost()">Dang Tin Ngay</button><p id="postMsg"></p></div></div></div>
 <div id="tab-pi" class="hidden section"><div class="card"><div class="card-body"><h2>Vi Pi Cua Ban</h2><p id="piStatus">Chua dang nhap Pi Auth. Bam Connect o tren de dang nhap.</p><button class="buy" onclick="loginWithPi()">Dang nhap bang Pi Auth</button><p style="color:#d8c8ff;font-size:13px">Pi Cho hien la cho dang tin - Pioneer tu lien he trao doi bang Pi, khong thanh toan truc tiep trong app.</p></div></div></div>
