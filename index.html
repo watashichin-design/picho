@@ -4,69 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pi Cho - Trao doi hang bang Pi</title>
+<meta name="description" content="Pi Cho - Cho trao doi hang hoa bang Pi cho Pioneer Viet Nam. Tuan thu Pi App Guidelines, ho tro Pi Auth va Pi Payments.">
+<meta name="keywords" content="Pi Network, Pi Cho, Pi Auth, Pi Payments, trao doi Pi">
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>
-  Pi.init({ version: "2.0", sandbox: false });
-</script>
+<script>Pi.init({ version: "2.0", sandbox: false });</script>
 <style>
-  body{font-family:Arial,sans-serif;margin:0;background:#f5f0ff;color:#222}
-  header{background:#6a1fa2;color:#fff;padding:16px;text-align:center}
-  header h1{margin:0;font-size:24px}
-  .gold{color:#ffd700}
-  .btn{background:#ffd700;color:#3b0a5e;border:0;padding:12px 20px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:10px 0}
-  .card{background:#fff;margin:12px;padding:14px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-  .card img{width:100%;border-radius:10px}
-  .price{color:#6a1fa2;font-weight:800}
-  input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:10px;box-sizing:border-box}
-  .tabs{display:flex;gap:8px;padding:12px}
-  .tabs button{flex:1;padding:10px;border-radius:20px;border:1px solid #6a1fa2;background:#fff;color:#6a1fa2;font-weight:700}
-  .tabs button.active{background:#6a1fa2;color:#fff}
-  footer{padding:16px;text-align:center;font-size:13px;color:#666}
+body{font-family:Arial,sans-serif;margin:0;background:#f5f0ff;color:#222}
+header{background:#6a1fa2;color:#fff;padding:16px;text-align:center}
+.btn{background:#ffd700;color:#3b0a5e;border:0;padding:12px 20px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:8px 0}
+.btn2{background:#fff;color:#6a1fa2;border:2px solid #6a1fa2;padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:8px 0}
+.card{background:#fff;margin:12px;padding:14px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card img{width:100%;border-radius:10px}
+.price{color:#6a1fa2;font-weight:800}
+input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:10px;box-sizing:border-box}
+.tabs{display:flex;gap:8px;padding:12px}
+.tabs button{flex:1;padding:10px;border-radius:20px;border:1px solid #6a1fa2;background:#fff;color:#6a1fa2;font-weight:700}
+.tabs button.active{background:#6a1fa2;color:#fff}
+footer{padding:16px;text-align:center;font-size:13px;color:#666}
+a{color:#6a1fa2}
 </style>
 </head>
 <body>
 <header>
-  <h1>&pi; Pi Cho <span class="gold">- Trao Doi Bang Pi</span></h1>
-  <p>Cho trao doi hang hoa bang Pi cho Pioneer Viet Nam</p>
-  <div id="user">Chua dang nhap</div>
-  <button class="btn" onclick="login()">Dang nhap bang Pi - Pi Auth</button>
+<h1>&pi; Pi Cho - Trao Doi Bang Pi</h1>
+<p>Cho trao doi hang hoa bang Pi cho Pioneer Viet Nam - Tuan thu Pi App Guidelines</p>
+<div id="user">Chua dang nhap - Hay dang nhap bang Pi Auth</div>
+<button class="btn" onclick="loginWithPi()">Dang nhap bang Pi - Pi Auth</button>
+<button class="btn2" onclick="testPayment()">Thanh toan thu bang Pi - Pi Payments (0.1 Pi)</button>
+<p id="authStatus" style="font-size:13px">Pi Auth: chua dang nhap | Pi Payments: san sang | Pi SDK: 2.0</p>
 </header>
-
 <div class="tabs">
-  <button class="active" onclick="showTab('home',this)">Trang chu</button>
-  <button onclick="showTab('post',this)">Dang Tin</button>
-  <button onclick="showTab('about',this)">Dieu khoan</button>
+<button class="active" onclick="showTab('home',this)">Trang chu</button>
+<button onclick="showTab('post',this)">Dang Tin</button>
+<button onclick="showTab('terms',this)">Dieu khoan</button>
+<button onclick="showTab('privacy',this)">Bao mat</button>
 </div>
-
 <div id="home">
-  <div style="padding:0 12px"><input id="search" placeholder="Tim do an, quan ao, dien thoai..." oninput="filter()"></div>
-  <div id="list"></div>
+<div style="padding:0 12px"><input id="search" placeholder="Tim do an, quan ao, dien thoai..." oninput="render()"></div>
+<div id="list"></div>
+<div class="card"><h3>Ve Pi Cho</h3><p>Pi Cho la ung dung trao doi hang hoa bang Pi. Nguoi dung dang nhap bang Pi Auth, dang tin trao doi, thanh toan bang Pi Payments. Pi Cho khong mua ban Pi lay tien mat, khong mua ban Pi lay tien phap dinh. Chi trao doi hang hoa bang Pi.</p><p><a href="#terms" onclick="showTab('terms',document.querySelectorAll('.tabs button')[2])">Xem Dieu khoan</a> | <a href="#privacy" onclick="showTab('privacy',document.querySelectorAll('.tabs button')[3])">Xem Chinh sach Bao mat</a></p></div>
 </div>
-
-<div id="post" style="display:none;padding:12px">
-  <div class="card">
-    <h3>Dang tin moi - Chi trao doi bang Pi, khong tien mat</h3>
-    <input id="pName" placeholder="Ten mon do">
-    <input id="pPrice" type="number" placeholder="Gia Pi - vi du: 5">
-    <input id="pLoc" placeholder="Dia chi / Tinh thanh">
-    <input id="pContact" placeholder="Lien he - Zalo / SDT">
-    <textarea id="pDesc" placeholder="Mo ta mon do"></textarea>
-    <button class="btn" onclick="addPost()">Dang Tin</button>
-    <p id="postMsg"></p>
-  </div>
-</div>
-
-<div id="about" style="display:none;padding:12px">
-  <div class="card">
-    <h3>Dieu khoan & Chinh sach bao mat</h3>
-    <p>Pi Cho chi cho phep trao doi hang hoa bang Pi. Khong mua ban Pi lay tien mat, khong mua ban Pi lay tien phap dinh.</p>
-    <p>App tuan thu Pi App Guidelines va su dung Pi Auth de xac thuc Pioneer. Thong tin ca nhan chi dung de lien he trao doi.</p>
-    <p>Lien he: support@picho.vn</p>
-  </div>
-</div>
-
-<footer>Pi Cho tuan thu Pi App Guidelines - Chi trao doi hang bang Pi - Khong tien mat</footer>
-
+<div id="post" style="display:none;padding:12px"><div class="card"><h3>Dang tin moi - Chi trao doi bang Pi</h3><input id="pName" placeholder="Ten mon do"><input id="pPrice" type="number" placeholder="Gia Pi - vi du: 5"><input id="pLoc" placeholder="Dia chi / Tinh thanh"><input id="pContact" placeholder="Lien he"><textarea id="pDesc" placeholder="Mo ta"></textarea><button class="btn" onclick="addPost()">Dang Tin</button><p id="postMsg"></p></div></div>
+<div id="terms" style="display:none;padding:12px"><div class="card"><h3>Dieu khoan Su dung - Terms of Service</h3><p>1. Pi Cho chi cho phep trao doi hang hoa bang Pi.</p><p>2. Nghiem cam mua ban Pi lay tien mat hoac tien phap dinh.</p><p>3. Nguoi dung phai dang nhap bang Pi Auth de xac thuc Pioneer.</p><p>4. Thanh toan thuc hien qua Pi Payments, tuan thu Pi App Guidelines.</p><p>5. Pi Cho khong luu tru mat khau, khong thu thap thong tin nhay cam.</p><p>Lien he: support@picho.vn - Dia chi: Di An, Binh Duong, Viet Nam</p></div></div>
+<div id="privacy" style="display:none;padding:12px"><div class="card"><h3>Chinh sach Bao mat - Privacy Policy</h3><p>Pi Cho ton trong quyen rieng tu cua ban. Chung toi chi thu thap username Pi qua Pi Auth de hien thi va lien he trao doi.</p><p>Chung toi khong ban, khong chia se du lieu ca nhan cho ben thu ba. Du lieu dang tin duoc luu tren trinh duyet cua ban.</p><p>Ban co the xoa tin dang bat cu luc nao. Lien he xoa du lieu: support@picho.vn</p><p>Cap nhat: 22/11/2026</p></div></div>
+<footer><p>Pi Cho - Tuan thu Pi App Guidelines | Ho tro Pi Auth va Pi Payments | Chi trao doi hang bang Pi - Khong tien mat</p><p><a href="#" onclick="showTab('terms',document.querySelectorAll('.tabs button')[2]);return false;">Terms</a> | <a href="#" onclick="showTab('privacy',document.querySelectorAll('.tabs button')[3]);return false;">Privacy Policy</a> | support@picho.vn</p></footer>
 <script>
 const defaultPosts=[
  {name:"Com chay - 1 hop",price:2,loc:"Di An, Binh Duong",contact:"Zalo: 090xxxx",desc:"Com chay gion, giao trong ngay",img:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800"},
@@ -75,40 +56,31 @@ const defaultPosts=[
 ];
 let posts=JSON.parse(localStorage.getItem('picho_posts')||'null')||defaultPosts;
 function render(){
-  const q=(document.getElementById('search').value||'').toLowerCase();
-  const list=document.getElementById('list');
-  list.innerHTML=posts.filter(p=>(p.name+p.loc).toLowerCase().includes(q)).map(p=>`
-    <div class="card">
-      <img src="${p.img}" onerror="this.src='https://via.placeholder.com/800x400?text=Pi+Cho'">
-      <h3>${p.name}</h3>
-      <div class="price">${p.price} Pi</div>
-      <p>${p.desc}</p>
-      <p>📍 ${p.loc} | ☎️ ${p.contact}</p>
-      <button class="btn" onclick="alert('Lien he: ${p.contact} de trao doi')">Trao Doi Ngay</button>
-    </div>`).join('');
+ const q=(document.getElementById('search').value||'').toLowerCase();
+ document.getElementById('list').innerHTML=posts.filter(p=>(p.name+p.loc).toLowerCase().includes(q)).map(p=>`<div class="card"><img src="${p.img}"><h3>${p.name}</h3><div class="price">${p.price} Pi</div><p>${p.desc}</p><p>📍 ${p.loc} | ☎️ ${p.contact}</p><button class="btn" onclick="payForItem('${p.name}',${p.price})">Trao Doi - Thanh toan ${p.price} Pi bang Pi Payments</button></div>`).join('');
 }
-function filter(){render();}
-function showTab(id,btn){
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  ['home','post','about'].forEach(t=>document.getElementById(t).style.display=(t===id?'block':'none'));
+function showTab(id,btn){document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');['home','post','terms','privacy'].forEach(t=>document.getElementById(t).style.display=(t===id?'block':'none'));}
+async function loginWithPi(){
+ try{
+  const auth=await Pi.authenticate(['username','payments','wallet_address'], onIncompletePaymentFound);
+  document.getElementById('user').innerText='Xin chao, '+auth.user.username+' - Da dang nhap Pi Auth';
+  document.getElementById('authStatus').innerText='Pi Auth: da dang nhap - '+auth.user.username+' | Pi Payments: san sang | Pi SDK: 2.0';
+  alert('Dang nhap Pi Auth thanh cong: '+auth.user.username);
+ }catch(e){ alert('Hay mo app trong Pi Browser de dung Pi Auth. Loi: '+e.message); }
 }
-async function login(){
-  try{
-    const auth=await Pi.authenticate(['username'], onIncompletePaymentFound);
-    document.getElementById('user').innerText='Xin chao, '+auth.user.username+' - Da dang nhap Pi Auth';
-    alert('Dang nhap Pi thanh cong: '+auth.user.username);
-  }catch(e){ alert('Chua dang nhap duoc Pi Auth. Hay mo app trong Pi Browser. Loi: '+e.message); }
+function onIncompletePaymentFound(payment){ console.log('Incomplete payment found', payment); if(payment){ Pi.completePayment(payment.identifier); } }
+async function testPayment(){ await payForItem('Thanh toan thu Pi Cho', 0.1); }
+async function payForItem(name, amount){
+ try{
+  const payment=await Pi.createPayment({amount: amount, memo: 'Pi Cho - Trao doi: '+name, metadata: {item: name}}, {onReadyForServerApproval: function(paymentId){ console.log('Ready for approval', paymentId); }, onReadyForServerCompletion: function(paymentId, txid){ console.log('Ready for completion', paymentId, txid); }, onCancel: function(paymentId){ alert('Da huy thanh toan'); }, onError: function(error, payment){ alert('Loi thanh toan: '+error.message); }});
+  alert('Da tao thanh toan Pi Payments cho: '+name);
+ }catch(e){ alert('Thanh toan Pi Payments can mo trong Pi Browser. Loi: '+e.message); }
 }
-function onIncompletePaymentFound(payment){ console.log('Incomplete payment', payment); }
 function addPost(){
-  const name=document.getElementById('pName').value.trim();
-  const price=Number(document.getElementById('pPrice').value);
-  if(!name||!price){ document.getElementById('postMsg').innerText='Nhap ten va gia Pi!'; return; }
-  posts.unshift({name,price,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800'});
-  localStorage.setItem('picho_posts', JSON.stringify(posts));
-  document.getElementById('postMsg').innerText='Da dang tin!';
-  render(); showTab('home', document.querySelector('.tabs button'));
+ const name=document.getElementById('pName').value.trim(); const price=Number(document.getElementById('pPrice').value);
+ if(!name||!price){ document.getElementById('postMsg').innerText='Nhap ten va gia Pi!'; return; }
+ posts.unshift({name,price,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800'});
+ localStorage.setItem('picho_posts', JSON.stringify(posts)); document.getElementById('postMsg').innerText='Da dang tin!'; render(); showTab('home', document.querySelector('.tabs button'));
 }
 render();
 </script>
