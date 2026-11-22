@@ -45,7 +45,7 @@
 <button onclick="switchBottom('more',this)"><span>•••</span>More</button>
 </div>
 <script>
-let cat='all';
+let cat='all'; let currentAuth=null;
 const posts=[
 {name:"Com chay - 1 hop",price:2,loc:"Di An, Binh Duong",contact:"Zalo: 090xxxx",desc:"Com chay gion, giao trong ngay",img:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",cat:"food"},
 {name:"Ao thun Pi Network",price:8,loc:"TP HCM",contact:"Zalo: 090xxxx",desc:"Ao thun logo Pi, size M L XL",img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",cat:"fashion"},
@@ -59,9 +59,9 @@ function render(){
 function setCat(c,btn){cat=c;document.querySelectorAll('.chips button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
 function switchBottom(id,btn){document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');['home','post','pi','news','more'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==id));if(id==='home')window.scrollTo(0,0);}
 function showTab(id){switchBottom(id,document.querySelectorAll('.bottom button')[id==='post'?2:0]);}
-async function loginWithPi(){try{const auth=await Pi.authenticate(['username','payments','wallet_address'],onIncomplete);document.getElementById('user').innerText='Xin chao, '+auth.user.username+' - Da dang nhap Pi Auth';document.getElementById('piStatus').innerText='Da dang nhap: '+auth.user.username+' | Pi Payments san sang';alert('Dang nhap Pi Auth thanh cong: '+auth.user.username);}catch(e){alert('Hay mo trong Pi Browser de dung Pi Auth. Loi: '+e.message);}}
+async function loginWithPi(){try{const auth=await Pi.authenticate(['username','payments','wallet_address'],onIncomplete);currentAuth=auth;document.getElementById('user').innerText='Xin chao, '+auth.user.username+' - Da dang nhap Pi Auth';document.getElementById('piStatus').innerText='Da dang nhap: '+auth.user.username+' | Pi Payments san sang';alert('Dang nhap Pi Auth thanh cong: '+auth.user.username);return auth;}catch(e){alert('Hay mo trong Pi Browser de dung Pi Auth. Loi: '+e.message);return null;}}
 function onIncomplete(p){console.log(p);}
-async function payForItem(n,a){try{await Pi.createPayment({amount:a,memo:'Pi Cho - '+n,metadata:{item:n}},{onReadyForServerApproval:(id)=>console.log(id),onReadyForServerCompletion:(id,tx)=>console.log(id,tx),onCancel:()=>alert('Da huy'),onError:(e)=>alert(e.message)});alert('Da tao thanh toan '+a+' Pi cho '+n);}catch(e){alert('Mo trong Pi Browser de thanh toan Pi. Loi: '+e.message);}}
+async function payForItem(n,a){try{if(!currentAuth){alert('Ban chua dang nhap! Dang nhap Pi truoc khi trao doi...');const auth=await loginWithPi();if(!auth) return;}await Pi.createPayment({amount:a,memo:'Pi Cho - '+n,metadata:{item:n}},{onReadyForServerApproval:(id)=>console.log(id),onReadyForServerCompletion:(id,tx)=>console.log(id,tx),onCancel:()=>alert('Da huy'),onError:(e)=>alert(e.message)});alert('Da tao thanh toan '+a+' Pi cho '+n);}catch(e){if((e.message||'').includes('payments')){alert('Chua co quyen payments. Hay bam Connect o tren de dang nhap lai bang Pi Auth trong Pi Browser!');}else{alert('Mo trong Pi Browser de thanh toan Pi. Loi: '+e.message);}}}
 async function testPayment(){await payForItem('Thanh toan thu',0.1);}
 function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
 render();
