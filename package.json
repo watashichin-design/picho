@@ -1,0 +1,12 @@
+{
+  "name": "picho-pi-u2a",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --check server.js && node -e \"const fs=require('fs');const h=fs.readFileSync('index.html','utf8');for(const s of ['sdk.minepi.com/pi-sdk.js','Pi.createPayment','onReadyForServerApproval','onReadyForServerCompletion','onIncompletePayment','/api/orders','/api/payments/approve','/api/payments/complete']){if(!h.includes(s))throw new Error('missing '+s)}if(h.includes('PI_NETWORK_API_KEY'))throw new Error('secret in browser');console.log('frontend checks OK')\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
