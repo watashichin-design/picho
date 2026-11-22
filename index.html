@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi"><head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.minepi.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://socialchain.app https://picho.onrender.com https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com; img-src 'self' https: data:; frame-ancestors 'self' https://*.pinet.com https://*.minepi.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.minepi.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://socialchain.app https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com; img-src 'self' https: data:; frame-ancestors 'self' https://*.pinet.com https://*.minepi.com;">
 <script src="https://sdk.minepi.com/pi-sdk.js"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pi Cho - Pioneer Market</title>
 <style>
@@ -66,48 +66,23 @@ function updateLoginUI(user){
   const st=document.getElementById('piStatus'); if(st) st.innerText='Da dang nhap: '+user.username+' | uid: '+(user.uid||'');
   const btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='● '+user.username;
 }
-// ---- Pi U2A: product catalog is server-owned. Client only sends productId.
-// Existing listings (do not invent products):
-//   com-chay = "Com chay - 1 hop", 2 Pi
-//   ao-thun-pi = "Ao thun Pi Network", 8 Pi
-//   op-lung = "Op lung dien thoai", 3 Pi
-const PRODUCT_IDS = { "Com chay - 1 hop": "com-chay", "Ao thun Pi Network": "ao-thun-pi", "Op lung dien thoai": "op-lung" };
-// BACKEND: same-origin server.js in production. Legacy App Studio host only as fallback
-// when this file is served from GitHub Pages without its own server.
-const BACKEND = "https://picho.onrender.com"; // Backend Render da deploy, thay cho App Studio 404
-async function callApi(path, body, opts = {}) {
-  const res = await fetch(BACKEND + path, { method: "POST",
-    headers: { "Content-Type": "application/json", ...(window.__piSessionToken ? { "Authorization": "Bearer " + window.__piSessionToken } : {}) },
-    body: JSON.stringify(body || {}) });
-  const text = await res.text();
-  let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) { /* non-JSON */ }
-  if (res.status === 404) { alert('Backend tra ve 404 o ' + path + '. Backend chua deploy endpoint nay. Deploy server.js (xem BACKEND_HANDOFF.md) roi test lai.'); return null; }
-  if (!res.ok) throw new Error("Backend " + path + " tra ve " + res.status + ": " + (data && data.error ? data.error : text.slice(0, 200)));
-  return data;
+const BACKEND = "https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com";
+async function callBackend(path, body){
+  const res = await fetch(BACKEND + path, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (window.__piSessionToken || "") }, body: JSON.stringify(body) });
+  if(res.status === 404){ alert('Backend App Studio tra ve 404 o ' + path + '. Tam thoi chi dang nhap / dang tin duoc, chua thanh toan duoc.'); return null; }
+  if(!res.ok) throw new Error("Backend " + path + " tra ve " + res.status);
+  return res.json();
 }
-// Incomplete payments: Pi SDK calls this on authenticate() if a payment was left unfinished.
-// Must resume through the backend, never grant/complete from the browser alone.
-async function onIncompletePayment(payment) {
-  try {
-    if (!payment || !payment.identifier) return;
-    const r = await callApi("/api/payments/incomplete", { paymentId: payment.identifier });
-    if (r && r.resolved) alert('Da xu ly thanh toan dang do: ' + (r.status || 'done'));
-  } catch (e) { console.error('incomplete payment', e); }
-}
-function onIncomplete(p){ return onIncompletePayment(p); }
 async function loginWithPi(){
   try{
-    await Pi.init({ version: "2.0", sandbox: true }); // TESTNET ONLY / Sandbox
+    await Pi.init({ version: "2.0", sandbox: true });
     const auth = await Pi.authenticate(["username", "payments"], onIncompletePayment);
     currentAuth = auth;
-    // Server verifies accessToken via Platform API GET /v2/me and issues its own session.
-    // Legacy App Studio backend used /pi/auth/v1/login; new server.js uses /api/auth/login.
-    let data = null;
-    try { data = await callApi("/api/auth/login", { accessToken: auth.accessToken }); }
-    catch (e) { alert('Login backend loi: ' + e.message); return null; }
-    if (!data) { alert('Login backend khong tra ve session. Xem log Render service picho.'); return null; }
+    const res = await fetch(BACKEND + "/pi/auth/v1/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accessToken: auth.accessToken }) });
+    if(!res.ok) throw new Error("App Studio login failed: " + res.status);
+    const data = await res.json();
     window.__piSessionToken = data.sessionToken;
-    const user = data.user || { username: auth.user.username, uid: auth.user.uid };
+    const user = data.user;
     localStorage.setItem('picho_user', JSON.stringify(user));
     updateLoginUI(user);
     alert('Dang nhap Pi Auth thanh cong: ' + user.username);
@@ -117,31 +92,14 @@ async function loginWithPi(){
 async function payForItem(n, a){
   try{
     if(!currentAuth){ const auth = await loginWithPi(); if(!auth) return; }
-    // 1. Server creates the order: authoritative amount/memo/metadata. Browser amount `a` is NOT trusted.
-    const productId = PRODUCT_IDS[n];
-    if (!productId) { alert('San pham khong co trong danh muc server, khong thanh toan.'); return; }
-    const order = await callApi("/api/orders", { productId });
-    if (!order || !order.orderId) return; // 404 already alerted in callApi
-    const amount = order.amount, memo = order.memo, metadata = order.metadata || { orderId: order.orderId, productId };
-    // 2. Pi.createPayment with server-order values only.
-    await Pi.createPayment({ amount, memo, metadata },
+    await Pi.createPayment({ amount: a, memo: 'Pi Cho - ' + n, metadata: { item: n } },
       {
-        onReadyForServerApproval: async (paymentId) => {
-          const r = await callApi("/api/payments/approve", { paymentId, orderId: order.orderId });
-          if (r === null) throw new Error("Backend 404 - chua deploy /api/payments/approve");
-        },
-        onReadyForServerCompletion: async (paymentId, txid) => {
-          const r = await callApi("/api/payments/complete", { paymentId, txid, orderId: order.orderId });
-          if (r === null) return;
-          if (r.fulfilled) alert('Thanh toan thanh cong ' + amount + ' Pi cho ' + n + '! Don: ' + order.orderId);
-          else alert('Thanh toan da ghi nhan, cho server xac minh: ' + order.orderId);
-        },
-        onCancel: async (paymentId) => { if (paymentId) await callApi("/api/payments/cancel", { paymentId, orderId: order.orderId }).catch(()=>{}); alert('Da huy thanh toan'); },
+        onReadyForServerApproval: async (paymentId) => { const r = await callBackend("/pi/payments/approve", { paymentId }); if(r === null) throw new Error("Backend 404 - App Studio chua bat endpoint /pi/payments/approve"); },
+        onReadyForServerCompletion: async (paymentId, txid) => { const r = await callBackend("/pi/payments/complete", { paymentId, txid }); if(r === null) return; alert('Thanh toan thanh cong ' + a + ' Pi cho ' + n + '!'); },
+        onCancel: () => alert('Da huy thanh toan'),
         onError: (e) => alert('Loi thanh toan: ' + (e && e.message ? e.message : e))
       });
-  }catch(e){
-    alert('Chua thanh toan duoc. Ly do: ' + e.message);
-  }
+  }catch(e){ alert('Chua thanh toan duoc. Ly do: ' + e.message); }
 }
 function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
 render();
