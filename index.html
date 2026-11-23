@@ -25,7 +25,7 @@
 .footer{padding:10px 14px;text-align:center;color:#a78bfa;font-size:12px}
 </style></head>
 <body>
-<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
+<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()"><span style="color:#ff3b30">●</span> Connect</button></div></div>
 <div id="tab-home">
 <div class="hero"><small>THE PI ECOSYSTEM'S PIONEER MARKET</small><h1>Pioneer<br>Market<br>Brief</h1><p id="user" style="color:#ffd700">Chua dang nhap - Bam Connect de dang nhap bang Pi Auth</p></div>
 <div class="banner"><span class="pill">✦ COMMUNITY MARKET</span><h2>Cho Trao Doi Bang Pi</h2><p>Dang tin cua ban, trao doi hang hoa bang Pi cho Pioneer Viet Nam. Khong tien mat, chi trao doi bang Pi.</p><div class="btn-row"><button class="btn-white" onclick="showTab('post')">✎ Dang Tin</button><button class="btn-ghost" onclick="document.getElementById('list').scrollIntoView()">Xem Cho →</button></div></div>
@@ -54,7 +54,7 @@ const posts=[
 let allPosts=JSON.parse(localStorage.getItem('picho_v3')||'null')||posts;
 function render(){
  const q=(document.getElementById('search').value||'').toLowerCase();
- document.getElementById('list').innerHTML=allPosts.filter(p=>(cat==='all'||p.cat===cat)&&(p.name+p.loc).toLowerCase().includes(q)).map(p=>`<div class="card"><img src="${p.img}"><div class="card-body"><small style="color:#ff6b8a">● ${p.loc}</small><h3>${p.name}</h3><div class="price">${p.price} Pi</div><p>${p.desc}<br>☎️ ${p.contact}</p><button class="buy" onclick="payForItem('${p.name}',${p.price})">Trao Doi - ${p.price} Pi</button></div></div>`).join('');
+ document.getElementById('list').innerHTML=allPosts.filter(p=>(cat==='all'||p.cat===cat)&&(p.name+p.loc).toLowerCase().includes(q)).map((p,idx)=>`<div class="card"><img src="${p.img}"><div class="card-body"><small style="color:#ff6b8a">● ${p.loc}</small><h3>${p.name}</h3><div class="price">${p.price} Pi</div><p>${p.desc}<br>☎️ ${p.contact}</p><button class="buy" onclick="payForItem('${p.name}',${p.price})">Trao Doi - ${p.price} Pi</button><button class="buy" style="background:#ff4d4d;color:#fff;margin-top:6px" onclick="deletePost(${idx})">🗑️ Gỡ tin này</button></div></div>`).join('');
 }
 function setCat(c,btn){cat=c;document.querySelectorAll('.chips button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
 function switchBottom(id,btn){document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');['home','post','pi','news','more'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==id));if(id==='home')window.scrollTo(0,0);}
@@ -64,7 +64,14 @@ function updateLoginUI(user){
   piUser=user;
   document.getElementById('user').innerText='Xin chao, '+user.username+' - Da dang nhap Pi Auth';
   const st=document.getElementById('piStatus'); if(st) st.innerText='Da dang nhap: '+user.username+' | uid: '+(user.uid||'');
-  const btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='● '+user.username;
+  const btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='<span style="color:#22c55e">●</span> '+user.username;
+}
+function updateLogoutUI(){
+  piUser=null; currentAuth=null;
+  localStorage.removeItem('picho_user');
+  document.getElementById('user').innerText='Chua dang nhap - Bam Connect de dang nhap bang Pi Auth';
+  const st=document.getElementById('piStatus'); if(st) st.innerText='Chua dang nhap Pi Auth. Bam Connect o tren de dang nhap.';
+  const btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='<span style="color:#ff3b30">●</span> Connect';
 }
 const BACKEND = "https://backend.appstudio-u7cm9zhmha0ruwv8.piappengine.com";
 async function callBackend(path, body){
@@ -74,6 +81,8 @@ async function callBackend(path, body){
   return res.json();
 }
 async function loginWithPi(){
+  // Bam lan 2 = ngat ket noi
+  if(currentAuth || piUser){ if(confirm('Ngat ket noi Pi?')) updateLogoutUI(); return null; }
   try{
     await Pi.init({ version: "2.0", sandbox: true });
     const auth = await Pi.authenticate(["username", "payments"], onIncomplete);
@@ -101,7 +110,9 @@ async function payForItem(n, a){
       });
   }catch(e){ alert('Chua thanh toan duoc. Ly do: ' + e.message); }
 }
-function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
+function pickImgFor(n){ const s=n.toLowerCase(); if(s.includes('com')||s.includes('cơm')||s.includes('food')||s.includes('an')||s.includes('banh')||s.includes('bánh')) return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800'; if(s.includes('ao')||s.includes('áo')||s.includes('thun')||s.includes('quan')||s.includes('quần')) return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800'; if(s.includes('op')||s.includes('ốp')||s.includes('dien thoai')||s.includes('điện thoại')||s.includes('phone')) return 'https://images.unsplash.com/photo-1601593346740-925612772716?w=800'; return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800'; }
+function deletePost(idx){ if(!confirm('Gỡ tin này?')) return; allPosts.splice(idx,1); localStorage.setItem('picho_v3',JSON.stringify(allPosts)); render(); }
+function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:pickImgFor(n),cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
 render();
 // Khoi phuc UI neu da login truoc do, nhung payForItem van phai login lai neu currentAuth null (do reload trang)
 try{ const saved=JSON.parse(localStorage.getItem('picho_user')||'null'); if(saved) updateLoginUI(saved); }catch(e){}
