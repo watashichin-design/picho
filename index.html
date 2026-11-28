@@ -46,7 +46,7 @@
 .footer{padding:10px 14px;text-align:center;color:#a78bfa;font-size:12px}
 </style></head>
 <body>
-<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div style="display:flex;align-items:center;gap:8px"><span id="loginCount" style="color:#ffd700;font-weight:800;font-size:14px">👥 —</span><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
+<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div style="display:flex;align-items:center;gap:8px"><span id="loginCount" style="color:#ffd700;font-weight:800;font-size:14px">👥 —</span><button class="connect" id="connectBtn" onclick="togglePiCho()">&#x25CF; Connect</button></div></div>
 <div id="tab-home">
 <div class="hero"><small>THE PI ECOSYSTEM'S PIONEER MARKET</small><h1>Pioneer<br>Market<br>Brief</h1><p id="user" style="color:#ffd700">Chua dang nhap - Bam Connect de dang nhap bang Pi Auth</p></div>
 <div class="banner"><span class="pill">✦ COMMUNITY MARKET</span><h2>Cho Trao Doi Bang Pi</h2><p>Dang tin cua ban, trao doi hang hoa bang Pi cho Pioneer Viet Nam. Khong tien mat, chi trao doi bang Pi.</p><div class="btn-row"><button class="btn-white" onclick="showTab('post')">✎ Dang Tin</button><button class="btn-ghost" onclick="document.getElementById('list').scrollIntoView()">Xem Cho →</button></div></div>
@@ -55,7 +55,7 @@
 <div class="footer">Pi Cho - Tuan thu Pi App Guidelines | Pi Auth | Chi trao doi bang Pi</div>
 </div>
 <div id="tab-post" class="hidden section"><div class="card"><div class="card-body form"><h2>Dang Tin Moi</h2><input id="pName" placeholder="Ten mon do"><input id="pPrice" type="number" placeholder="Gia Pi - vd: 5"><input id="pLoc" placeholder="Dia chi"><input id="pContact" placeholder="Lien he Zalo / SDT"><textarea id="pDesc" placeholder="Mo ta"></textarea><button class="buy" onclick="addPost()">Dang Tin Ngay</button><p id="postMsg"></p></div></div></div>
-<div id="tab-pi" class="hidden section"><div class="card"><div class="card-body"><h2>Vi Pi Cua Ban</h2><p id="piStatus">Chua dang nhap Pi Auth. Bam Connect o tren de dang nhap.</p><button class="buy" onclick="loginWithPi()">Dang nhap bang Pi Auth</button><p style="color:#d8c8ff;font-size:13px">Pi Cho hien la cho dang tin - Pioneer tu lien he trao doi bang Pi, khong thanh toan truc tiep trong app.</p></div></div></div>
+<div id="tab-pi" class="hidden section"><div class="card"><div class="card-body"><h2>Vi Pi Cua Ban</h2><p id="piStatus">Chua dang nhap Pi Auth. Bam Connect o tren de dang nhap.</p><button class="buy" onclick="togglePiCho()">Dang nhap bang Pi Auth</button><p style="color:#d8c8ff;font-size:13px">Pi Cho hien la cho dang tin - Pioneer tu lien he trao doi bang Pi, khong thanh toan truc tiep trong app.</p></div></div></div>
 <div id="tab-news" class="hidden section"><h3>📰 Tin Pi Cho</h3><div class="card"><div class="card-body"><small style="color:#ff6b8a">2 DAYS AGO</small><h3>Pi Cho mo cho trao doi bang Pi cho Pioneer Viet</h3><p>Chi trao doi hang bang Pi, khong tien mat. Dang tin mien phi, ket noi truc tiep Pioneer voi Pioneer.</p></div></div></div>
 <div id="tab-more" class="hidden section"><div class="card"><div class="card-body"><h3>Dieu khoan & Bao mat</h3><p>1. Chi trao doi hang hoa bang Pi. Khong mua ban Pi lay tien mat.</p><p>2. Dang nhap bang Pi Auth, thanh toan bang Pi Payments.</p><p>3. Pi Cho tuan thu Pi App Guidelines.</p><p>Lien he: support@picho.vn</p></div></div></div>
 <div class="bottom">
@@ -86,12 +86,12 @@ function updateLoginUI(user){
   if(!user){
     var u=document.getElementById('user'); if(u) u.innerText='Chua dang nhap - Bam Connect de dang nhap bang Pi Auth';
     var st=document.getElementById('piStatus'); if(st) st.innerText='Chua dang nhap';
-    var btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='○ Connect';
+    var btn=document.getElementById('connectBtn'); if(btn){ btn.innerHTML='○ Connect'; btn.style.color='#ff5555'; btn.style.borderColor='#ff5555'; }
     return;
   }
   document.getElementById('user').innerText='Xin chao, '+user.username+' - Da dang nhap Pi Auth';
   const st2=document.getElementById('piStatus'); if(st2) st2.innerText='Da dang nhap: '+user.username+' | uid: '+(user.uid||'');
-  const btn2=document.getElementById('connectBtn'); if(btn2) btn2.innerHTML='● '+user.username;
+  const btn2=document.getElementById('connectBtn'); if(btn2){ btn2.innerHTML='● '+user.username; btn2.style.color='#22c55e'; btn2.style.borderColor='#22c55e'; }
 }
 // ---- Pi U2A: product catalog is server-owned. Client only sends productId.
 // Existing listings (do not invent products):
@@ -163,6 +163,21 @@ function incrementLoginCount(){
     });
 }
 loadGlobalCount();
+
+
+// ---- NÚT CONNECT LÀ CÔNG TẮC 2 CHIỀU - SỬA LỖI BẤM LẦN 2 VẪN +1 ----
+// Trước đây nút Connect lúc nào cũng gọi loginWithPi() nên bấm lần 2 nó lại đăng nhập tiếp, lại +1, không bao giờ thoát.
+// Giờ: Đang đăng nhập (có piUser) mà bấm -> THOÁT, không +1. Chưa đăng nhập mà bấm -> ĐĂNG NHẬP, +1.
+function togglePiCho(){
+  if(typeof piUser !== 'undefined' && piUser && piUser.username){
+    // Đang đăng nhập -> Thoát, KHÔNG +1
+    try{ sessionStorage.removeItem('picho_user'); localStorage.removeItem('picho_user'); }catch(e){}
+    currentAuth=null; piUser=null;
+    updateLoginUI(null);
+    return;
+  }
+  loginWithPi();
+}
 
 async function loginWithPi(){
   try{
