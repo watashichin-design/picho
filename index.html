@@ -46,7 +46,7 @@
 .footer{padding:10px 14px;text-align:center;color:#a78bfa;font-size:12px}
 </style></head>
 <body>
-<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
+<div class="top"><div class="logo"><div class="logo-icon">&pi;</div><div><b>Pi Cho</b><span>PIONEER MARKET • TESTNET</span></div></div><div style="display:flex;align-items:center;gap:8px"><span id="loginCount" style="color:#ffd700;font-weight:800;font-size:14px">👥 —</span><button class="connect" id="connectBtn" onclick="loginWithPi()">&#x25CF; Connect</button></div></div>
 <div id="tab-home">
 <div class="hero"><small>THE PI ECOSYSTEM'S PIONEER MARKET</small><h1>Pioneer<br>Market<br>Brief</h1><p id="user" style="color:#ffd700">Chua dang nhap - Bam Connect de dang nhap bang Pi Auth</p></div>
 <div class="banner"><span class="pill">✦ COMMUNITY MARKET</span><h2>Cho Trao Doi Bang Pi</h2><p>Dang tin cua ban, trao doi hang hoa bang Pi cho Pioneer Viet Nam. Khong tien mat, chi trao doi bang Pi.</p><div class="btn-row"><button class="btn-white" onclick="showTab('post')">✎ Dang Tin</button><button class="btn-ghost" onclick="document.getElementById('list').scrollIntoView()">Xem Cho →</button></div></div>
@@ -82,10 +82,16 @@ function switchBottom(id,btn){document.querySelectorAll('.bottom button').forEac
 function showTab(id){switchBottom(id,document.querySelectorAll('.bottom button')[id==='post'?2:0]);}
 function onIncomplete(p){console.log(p);}
 function updateLoginUI(user){
-  piUser=user;
+  piUser=user||null;
+  if(!user){
+    var u=document.getElementById('user'); if(u) u.innerText='Chua dang nhap - Bam Connect de dang nhap bang Pi Auth';
+    var st=document.getElementById('piStatus'); if(st) st.innerText='Chua dang nhap';
+    var btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='○ Connect';
+    return;
+  }
   document.getElementById('user').innerText='Xin chao, '+user.username+' - Da dang nhap Pi Auth';
-  const st=document.getElementById('piStatus'); if(st) st.innerText='Da dang nhap: '+user.username+' | uid: '+(user.uid||'');
-  const btn=document.getElementById('connectBtn'); if(btn) btn.innerHTML='● '+user.username;
+  const st2=document.getElementById('piStatus'); if(st2) st2.innerText='Da dang nhap: '+user.username+' | uid: '+(user.uid||'');
+  const btn2=document.getElementById('connectBtn'); if(btn2) btn2.innerHTML='● '+user.username;
 }
 // ---- Pi U2A: product catalog is server-owned. Client only sends productId.
 // Existing listings (do not invent products):
@@ -116,6 +122,48 @@ async function onIncompletePayment(payment) {
   } catch (e) { console.error('incomplete payment', e); }
 }
 function onIncomplete(p){ return onIncompletePayment(p); }
+
+// ---- ĐÓNG TRANG LÀ TỰ THOÁT ĐĂNG NHẬP ----
+// Trước đây lưu vào localStorage nên đóng trang rồi mở lại vẫn còn đăng nhập. Giờ đổi sang sessionStorage + tự xóa khi đóng trang.
+window.addEventListener('pagehide', function(){ try{ sessionStorage.removeItem('picho_user'); currentAuth=null; updateLoginUI(null); }catch(e){} });
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden){
+    setTimeout(function(){ if(document.hidden){ try{ sessionStorage.removeItem('picho_user'); currentAuth=null; updateLoginUI(null); }catch(e){} } }, 3000);
+  }
+});
+
+
+// ---- BỘ ĐẾM ĐĂNG NHẬP - GIỐNG PI VIỆT ----
+// 1 lần đăng nhập thành công = +1, không trừ khi đăng xuất. Hiện +1 ngay, không đợi mạng.
+var ABACUS_NS='picho'; var ABACUS_KEY='logins-v1';
+function getLocalCount(){ try{ return parseInt(sessionStorage.getItem('picho_login_count_backup')||localStorage.getItem('picho_login_count_backup')||'0',10)||0; }catch(e){ return 0; } }
+function setLocalCount(n){ try{ sessionStorage.setItem('picho_login_count_backup', String(n)); localStorage.setItem('picho_login_count_backup', String(n)); }catch(e){} }
+function showCounts(v){ var el=document.getElementById('loginCount'); if(!el) return; var local=getLocalCount(); var show = v==null ? local : Math.max(v, local); el.innerText='👥 ' + show; }
+function loadGlobalCount(){
+  fetch('https://abacus.jasoncameron.dev/get/' + ABACUS_NS + '/' + ABACUS_KEY)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ var v=d && d.value!=null ? d.value : null; if(v!=null && v>getLocalCount()) setLocalCount(v); showCounts(v); })
+    .catch(function(){
+      fetch('https://api.countapi.xyz/get/picho/logins-v1')
+        .then(function(r){ return r.json(); })
+        .then(function(d){ var v=d && d.value!=null ? d.value : null; if(v!=null && v>getLocalCount()) setLocalCount(v); showCounts(v); })
+        .catch(function(){ showCounts(null); });
+    });
+}
+function incrementLoginCount(){
+  var now=getLocalCount()+1; setLocalCount(now); showCounts(now);
+  fetch('https://abacus.jasoncameron.dev/hit/' + ABACUS_NS + '/' + ABACUS_KEY)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ var v=d && d.value!=null ? d.value : null; if(v!=null){ if(v>getLocalCount()) setLocalCount(v); showCounts(v); } })
+    .catch(function(){
+      fetch('https://api.countapi.xyz/hit/picho/logins-v1')
+        .then(function(r){ return r.json(); })
+        .then(function(d){ var v=d && d.value!=null ? d.value : null; if(v!=null){ if(v>getLocalCount()) setLocalCount(v); showCounts(v); } })
+        .catch(function(){});
+    });
+}
+loadGlobalCount();
+
 async function loginWithPi(){
   try{
     if(!window.Pi){ alert('Bạn mở Pi Cho bằng link GitHub nên Pi Auth bị chặn. Mở bằng link PiNet .pinet.com của Pi Cho trong Pi Browser để đăng nhập.'); return null; }
@@ -124,8 +172,9 @@ async function loginWithPi(){
     currentAuth = auth;
     // Chốt: đăng nhập chỉ cần Pi.authenticate trả về username, KHÔNG gọi backend Render nữa (backend đó chết nên mới báo Failed to fetch)
     const user = { username: auth.user.username, uid: auth.user.uid };
-    try{ localStorage.setItem('picho_user', JSON.stringify(user)); }catch(e){}
+    try{ sessionStorage.setItem('picho_user', JSON.stringify(user)); }catch(e){}
     updateLoginUI(user);
+    incrementLoginCount();
     return auth;
   }catch(e){ alert('Đăng nhập chưa được: ' + e.message + '. Bạn nhớ mở Pi Cho bằng Pi Browser + link .pinet.com, đừng mở bằng link github.io.'); return null; }
 }
@@ -161,5 +210,5 @@ async function payForItem(n, a){
 function addPost(){const n=document.getElementById('pName').value.trim();const pr=Number(document.getElementById('pPrice').value);if(!n||!pr){document.getElementById('postMsg').innerText='Nhap ten va gia Pi!';return;}allPosts.unshift({name:n,price:pr,loc:document.getElementById('pLoc').value||'Viet Nam',contact:document.getElementById('pContact').value||'Lien he qua Pi Cho',desc:document.getElementById('pDesc').value||'Hang trao doi bang Pi',img:'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',cat:'all'});localStorage.setItem('picho_v3',JSON.stringify(allPosts));document.getElementById('postMsg').innerText='Da dang tin!';render();switchBottom('home',document.querySelectorAll('.bottom button')[0]);}
 render();
 // Khoi phuc UI neu da login truoc do, nhung payForItem van phai login lai neu currentAuth null (do reload trang)
-try{ const saved=JSON.parse(localStorage.getItem('picho_user')||'null'); if(saved) updateLoginUI(saved); }catch(e){}
+try{ const saved=JSON.parse(sessionStorage.getItem('picho_user')||'null'); if(saved) updateLoginUI(saved); }catch(e){}
 </script><script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body></html>
